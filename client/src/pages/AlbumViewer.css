@@ -1,0 +1,149 @@
+.av-lb-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.av-lb-drive-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.av-lb-counter-sep {
+  opacity: 0.4;
+}
+
+.av-lb-loader-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.av-card-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0f0f1a, #0a0a12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s;
+  pointer-events: none;
+}
+
+.av-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.5s;
+  display: block;
+}
+
+.album-card-zoom-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.album-card:hover .album-card-zoom-icon {
+  opacity: 1;
+}
+
+.av-loading-page {
+  min-height: 100vh;
+  background: #080810;
+}
+
+.av-loading-text {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.av-error-page {
+  min-height: 100vh;
+  background: #080810;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.av-error-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+.av-error-text {
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 20px;
+}
+
+.av-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.av-nav-logo {
+  height: 36px;
+  object-fit: contain;
+}
+
+.av-nav-title {
+  font-family: var(--font-serif);
+  color: var(--gold);
+  font-size: 1.25rem;
+  font-weight: 300;
+}
+
+.av-nav-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.av-wa-btn {
+  text-decoration: none;
+}
+
+.av-hero-placeholder {
+  height: 30vh;
+}
+
+.album-section-line.fade-left {
+  background: linear-gradient(to left, var(--border), transparent);
+}
+
+.av-empty-state {
+  min-height: 300px;
+}
+
+.av-empty-text {
+  color: var(--text3);
+}
+
+.av-footer-wa-btn {
+  text-decoration: none;
+  margin-bottom: 32px;
+}
+
+.av-footer-copy {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.15);
+  margin-top: 24px;
+}

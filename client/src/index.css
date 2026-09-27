@@ -423,7 +423,7 @@ code {
   transition: opacity 0.3s;
 }
 .photo-card.selected {
-  outline: 3px solid var(--gold);
+  outline: 3px solid var(--blue);
   outline-offset: -3px;
 }
 .photo-check {
@@ -433,14 +433,14 @@ code {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--blue);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
   transform: scale(0.6);
   transition: all 0.2s ease;
-  color: #0a0a0f;
+  color: #fff;
   font-size: 14px;
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
@@ -479,7 +479,7 @@ code {
   opacity: 1;
   background: rgba(0,0,0,0.35);
 }
-.photo-card.selected .photo-overlay { background: rgba(232,200,122,0.06); }
+.photo-card.selected .photo-overlay { background: rgba(96,165,250,0.06); }
 
 /* Make overlay select button always visible on touch devices */
 @media (hover: none) {

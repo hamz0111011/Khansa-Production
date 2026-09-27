@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api'
+import { showToast, confirmSubmitPhotos } from '../lib/swal'
+import './ClientGallery.css'
 
 /* ══════════════════════════════════════════════════════════════
    HELPERS
@@ -31,7 +33,7 @@ function Countdown({ deadline }) {
   }, [deadline])
 
   if (left <= 0) return (
-    <div style={{ textAlign: 'center', color: 'var(--red)', fontWeight: 600 }}>
+    <div className="cg-deadline-warning">
       ⚠️ Batas waktu sudah habis
     </div>
   )
@@ -127,46 +129,26 @@ function Lightbox({ photos, startIdx, selected, onToggle, onClose, disabled }) {
 
   return (
     <div
-      style={{
-        position: 'fixed', inset: 0, zIndex: 2000,
-        background: 'rgba(0,0,0,0.97)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}
+      className="cg-lightbox-overlay"
       onMouseMove={resetCalm}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
       {/* Top bar */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 20px',
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)',
-        zIndex: 10,
-        transition: 'opacity 0.4s',
-        opacity: calm ? 0 : 1,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
+      <div className="cg-lightbox-topbar" style={{ opacity: calm ? 0 : 1 }}>
+        <div className="cg-flex-center-gap-12">
+          <span className="cg-lightbox-counter">
             {idx + 1} / {photos.length}
           </span>
           {photo.starred && (
-            <span style={{
-              background: 'var(--gold-bg)', color: 'var(--gold)',
-              fontSize: '0.7rem', padding: '2px 8px', borderRadius: 99,
-              border: '1px solid rgba(232,200,122,0.3)',
-            }}>⭐ Highlight</span>
+            <span className="cg-highlight-badge">⭐ Highlight</span>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="cg-flex-gap-8">
           {/* Zoom toggle */}
           <button
             onClick={() => setScale(s => s === 1 ? 2 : 1)}
-            style={{
-              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: 8, width: 36, height: 36, display: 'flex',
-              alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white',
-            }}
+            className="cg-lightbox-btn"
             title={scale === 1 ? 'Zoom In' : 'Zoom Out'}
           >
             {scale === 1
@@ -178,12 +160,11 @@ function Lightbox({ photos, startIdx, selected, onToggle, onClose, disabled }) {
           {!disabled && (
             <button
               onClick={() => onToggle(photo)}
+              className="cg-lightbox-btn-base cg-select-btn"
               style={{
                 background: isSelected ? 'rgba(232,200,122,0.2)' : 'rgba(255,255,255,0.1)',
                 border: `1px solid ${isSelected ? 'var(--gold)' : 'rgba(255,255,255,0.15)'}`,
-                borderRadius: 8, padding: '0 14px', height: 36, cursor: 'pointer',
                 color: isSelected ? 'var(--gold)' : 'white',
-                fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6,
               }}
             >
               {isSelected
@@ -195,11 +176,7 @@ function Lightbox({ photos, startIdx, selected, onToggle, onClose, disabled }) {
           {/* Close */}
           <button
             onClick={onClose}
-            style={{
-              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: 8, width: 36, height: 36, display: 'flex',
-              alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white',
-            }}
+            className="cg-lightbox-btn"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -210,14 +187,12 @@ function Lightbox({ photos, startIdx, selected, onToggle, onClose, disabled }) {
 
       {/* Image */}
       <div
-        style={{ position: 'relative', maxWidth: '90vw', maxHeight: '85vh', cursor: scale === 1 ? 'zoom-in' : 'zoom-out' }}
+        className="cg-lightbox-img-wrap"
+        style={{ cursor: scale === 1 ? 'zoom-in' : 'zoom-out' }}
         onClick={() => setScale(s => s === 1 ? 2 : 1)}
       >
         {loading && (
-          <div style={{
-            position: 'absolute', inset: 0, display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
-          }}>
+          <div className="cg-loader-overlay">
             <div className="spinner" />
           </div>
         )}
@@ -226,25 +201,15 @@ function Lightbox({ photos, startIdx, selected, onToggle, onClose, disabled }) {
           src={bigUrl(photo.id)}
           alt={photo.name}
           onLoad={() => setLoading(false)}
+          className="cg-lightbox-img"
           style={{
-            maxWidth: '90vw', maxHeight: '85vh',
-            objectFit: 'contain',
             transform: `scale(${scale})`,
-            transition: 'transform 0.3s ease, opacity 0.3s',
             opacity: loading ? 0 : 1,
-            display: 'block',
-            borderRadius: 8,
-            userSelect: 'none',
           }}
         />
         {/* Selected badge */}
         {isSelected && (
-          <div style={{
-            position: 'absolute', bottom: 12, right: 12,
-            background: 'var(--gold)', color: '#0a0a0f',
-            borderRadius: 99, padding: '4px 12px',
-            fontSize: '0.75rem', fontWeight: 700,
-          }}>✓ Dipilih</div>
+          <div className="cg-selected-badge">✓ Dipilih</div>
         )}
       </div>
 
@@ -252,14 +217,8 @@ function Lightbox({ photos, startIdx, selected, onToggle, onClose, disabled }) {
       {idx > 0 && (
         <button
           onClick={e => { e.stopPropagation(); go(-1) }}
-          style={{
-            position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
-            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 12, width: 48, height: 48,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: 'white', zIndex: 10,
-            transition: 'opacity 0.4s', opacity: calm ? 0 : 1,
-          }}
+          className="cg-nav-btn prev"
+          style={{ opacity: calm ? 0 : 1 }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"/>
@@ -269,14 +228,8 @@ function Lightbox({ photos, startIdx, selected, onToggle, onClose, disabled }) {
       {idx < photos.length - 1 && (
         <button
           onClick={e => { e.stopPropagation(); go(1) }}
-          style={{
-            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-            borderRadius: 12, width: 48, height: 48,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: 'white', zIndex: 10,
-            transition: 'opacity 0.4s', opacity: calm ? 0 : 1,
-          }}
+          className="cg-nav-btn next"
+          style={{ opacity: calm ? 0 : 1 }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="9 18 15 12 9 6"/>
@@ -285,13 +238,7 @@ function Lightbox({ photos, startIdx, selected, onToggle, onClose, disabled }) {
       )}
 
       {/* Bottom filmstrip */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        padding: '12px 16px',
-        background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
-        display: 'flex', gap: 6, justifyContent: 'center', overflowX: 'auto',
-        transition: 'opacity 0.4s', opacity: calm ? 0 : 1,
-      }}>
+      <div className="cg-filmstrip-wrap" style={{ opacity: calm ? 0 : 1 }}>
         {photos.slice(Math.max(0, idx - 5), idx + 6).map((p, i) => {
           const realIdx = Math.max(0, idx - 5) + i
           const isSel   = selected.some(s => s.id === p.id)
@@ -299,19 +246,17 @@ function Lightbox({ photos, startIdx, selected, onToggle, onClose, disabled }) {
             <div
               key={p.id}
               onClick={e => { e.stopPropagation(); setIdx(realIdx) }}
+              className="cg-filmstrip-item"
               style={{
-                width: 52, height: 52, flexShrink: 0, borderRadius: 6,
-                overflow: 'hidden', cursor: 'pointer',
                 outline: realIdx === idx ? '2px solid var(--gold)' : isSel ? '2px solid rgba(232,200,122,0.5)' : 'none',
                 outlineOffset: realIdx === idx ? 2 : 0,
                 opacity: realIdx === idx ? 1 : 0.55,
-                transition: 'all 0.2s',
               }}
             >
               <img
                 src={thumbUrl(p.id, 100)}
                 alt=""
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                className="cg-filmstrip-img"
               />
             </div>
           )
@@ -319,12 +264,7 @@ function Lightbox({ photos, startIdx, selected, onToggle, onClose, disabled }) {
       </div>
 
       {/* Swipe hint */}
-      <div style={{
-        position: 'absolute', bottom: 80, left: '50%', transform: 'translateX(-50%)',
-        fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)',
-        transition: 'opacity 0.4s', opacity: calm ? 0 : 1,
-        pointerEvents: 'none', whiteSpace: 'nowrap',
-      }}>
+      <div className="cg-swipe-hint" style={{ opacity: calm ? 0 : 1 }}>
         Geser kiri/kanan untuk pindah • Tap foto untuk zoom
       </div>
     </div>
@@ -352,18 +292,15 @@ function PhotoCard({ photo, isSelected, selectionOrder, onToggle, onZoom, disabl
 
   return (
     <div
-      className={`photo-card${isSelected ? ' selected' : ''}`}
-      style={{ cursor: 'pointer' }}
+      className={`photo-card${isSelected ? ' selected' : ''} cg-pointer`}
       onClick={() => onZoom()}
     >
       {/* Skeleton */}
       {status !== 'loaded' && status !== 'error' && (
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(135deg, #1a1a24, #12121a)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          animation: status === 'loading' ? 'pulse 1.5s ease infinite' : 'none',
-        }}>
+        <div 
+          className="cg-card-skeleton"
+          style={{ animation: status === 'loading' ? 'pulse 1.5s ease infinite' : 'none' }}
+        >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
             <circle cx="12" cy="13" r="4"/>
@@ -373,16 +310,12 @@ function PhotoCard({ photo, isSelected, selectionOrder, onToggle, onZoom, disabl
 
       {/* Error */}
       {status === 'error' && (
-        <div style={{
-          position: 'absolute', inset: 0, background: '#12121a',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: 4,
-        }}>
+        <div className="cg-card-error">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(248,113,113,0.4)" strokeWidth="1.5">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
             <circle cx="12" cy="16" r="0.5" fill="rgba(248,113,113,0.4)"/>
           </svg>
-          <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)' }}>Gagal dimuat</span>
+          <span className="cg-error-text">Gagal dimuat</span>
         </div>
       )}
 
@@ -396,47 +329,61 @@ function PhotoCard({ photo, isSelected, selectionOrder, onToggle, onZoom, disabl
 
       {/* Highlight badge */}
       {photo.starred && (
-        <div style={{
-          position: 'absolute', top: 8, left: 8,
-          background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-          borderRadius: 99, padding: '2px 7px',
-          fontSize: '0.65rem', color: 'var(--gold)',
-        }}>⭐</div>
+        <div className="cg-card-badge">⭐</div>
       )}
 
       {/* Hover overlay: zoom + select */}
       <div className="photo-overlay" style={{ opacity: undefined }}>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="cg-flex-gap-8">
           {/* Zoom */}
           <button
             onClick={e => { e.stopPropagation(); onZoom() }}
-            style={{
-              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: 8, width: 36, height: 36,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: 'white',
-            }}
+            className="cg-overlay-btn"
             title="Lihat besar"
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
             </svg>
           </button>
-          {/* Select */}
-          {!disabled && (
+
+          {!disabled && isSelected && (
+            <>
+              {/* Terpilih (sudah dipilih — visual indicator) */}
+              <button
+                onClick={e => { e.stopPropagation(); onZoom() }}
+                className="cg-overlay-btn cg-overlay-selected"
+                title="Foto sudah dipilih"
+                style={{ pointerEvents: 'none' }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </button>
+              {/* Batal Pilih (X merah) */}
+              <button
+                onClick={e => { e.stopPropagation(); onToggle(photo) }}
+                className="cg-overlay-btn cg-overlay-deselect"
+                title="Batal pilih foto ini"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </>
+          )}
+
+          {!disabled && !isSelected && (
+            /* Pilih foto */
             <button
               onClick={e => { e.stopPropagation(); onToggle(photo) }}
+              className="cg-overlay-btn"
               style={{
-                background: isSelected ? 'rgba(232,200,122,0.8)' : 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(4px)',
-                border: `1px solid ${isSelected ? 'var(--gold)' : 'rgba(255,255,255,0.2)'}`,
-                borderRadius: 8, width: 36, height: 36,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer',
-                color: isSelected ? '#0a0a0f' : 'white',
+                background: 'rgba(37,99,235,0.25)',
+                border: '1px solid rgba(96,165,250,0.6)',
+                color: '#93c5fd',
               }}
-              title={isSelected ? 'Batalkan pilihan' : 'Pilih foto'}
+              title="Pilih foto"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <polyline points="20 6 9 17 4 12"/>
@@ -448,14 +395,7 @@ function PhotoCard({ photo, isSelected, selectionOrder, onToggle, onZoom, disabl
 
       {/* Selection number badge */}
       {isSelected && (
-        <div style={{
-          position: 'absolute', top: 8, right: 8,
-          width: 26, height: 26, borderRadius: '50%',
-          background: 'var(--gold)', color: '#0a0a0f',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '0.75rem', fontWeight: 700,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-        }}>
+        <div className="cg-sel-order">
           {selectionOrder}
         </div>
       )}
@@ -473,24 +413,13 @@ function TabBar({ active, onChange, total, highlights, selected }) {
     { id: 'selected',  label: 'Terpilih',  count: selected },
   ]
   return (
-    <div style={{
-      display: 'flex', gap: 4,
-      background: 'var(--surface)',
-      border: '1px solid var(--border)',
-      borderRadius: 'var(--radius-sm)',
-      padding: 4,
-    }}>
+    <div className="cg-tab-bar">
       {tabs.map(t => (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
+          className="cg-tab"
           style={{
-            flex: 1, padding: '8px 12px',
-            borderRadius: 6, border: 'none',
-            cursor: 'pointer',
-            fontFamily: 'var(--font)',
-            fontSize: '0.8rem', fontWeight: 500,
-            transition: 'all 0.2s',
             background: active === t.id
               ? t.id === 'highlight' ? 'linear-gradient(135deg,rgba(232,200,122,0.2),rgba(232,200,122,0.1))'
                 : 'var(--surface2)'
@@ -503,57 +432,14 @@ function TabBar({ active, onChange, total, highlights, selected }) {
           }}
         >
           {t.label}
-          <span style={{
-            marginLeft: 5, fontSize: '0.7rem',
-            color: active === t.id ? 'inherit' : 'var(--text3)',
-          }}>
+          <span 
+            className="cg-tab-count"
+            style={{ color: active === t.id ? 'inherit' : 'var(--text3)' }}
+          >
             {t.count}
           </span>
         </button>
       ))}
-    </div>
-  )
-}
-
-/* ══════════════════════════════════════════════════════════════
-   CONFIRM MODAL
-══════════════════════════════════════════════════════════════ */
-function ConfirmModal({ count, max, onConfirm, onCancel, loading }) {
-  return (
-    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onCancel()}>
-      <div className="modal">
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{
-            width: 64, height: 64, borderRadius: '50%',
-            background: 'var(--gold-bg)', border: '1px solid rgba(232,200,122,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
-          }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-          </div>
-          <h2 className="modal-title">Konfirmasi Pilihan</h2>
-          <p className="modal-sub">
-            Anda memilih <strong style={{ color: 'var(--gold)' }}>{count}</strong> dari
-            maksimal <strong>{max}</strong> foto.
-            Setelah dikonfirmasi, pilihan tidak dapat diubah.
-          </p>
-        </div>
-        <div style={{
-          background: 'var(--gold-bg)', border: '1px solid rgba(232,200,122,0.2)',
-          borderRadius: 'var(--radius-sm)', padding: '12px 16px',
-          fontSize: '0.875rem', color: 'var(--text2)', marginBottom: 20,
-        }}>
-          ⚠️ Pastikan foto yang dipilih sudah benar karena tidak bisa diulang.
-        </div>
-        <div className="modal-actions">
-          <button className="btn btn-ghost" onClick={onCancel} disabled={loading}>Periksa Lagi</button>
-          <button className="btn btn-gold" onClick={onConfirm} disabled={loading}>
-            {loading ? <><div className="spinner spinner-sm" /> Menyimpan…</> : <>✓ Konfirmasi Pilihan</>}
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
@@ -595,21 +481,14 @@ export default function ClientGallery() {
   const [photosLoading, setPhotosLoading] = useState(false)
   const [error,        setError]        = useState(null)
   const [driveError,   setDriveError]   = useState(null)
-  const [showConfirm,  setShowConfirm]  = useState(false)
   const [submitting,   setSubmitting]   = useState(false)
   const [submitted,    setSubmitted]    = useState(false)
   const [waUrl,        setWaUrl]        = useState(null)  // WhatsApp URL setelah submit
-  const [toast,        setToast]        = useState(null)
   const [activeTab,    setActiveTab]    = useState('all')
   const [lbIdx,        setLbIdx]        = useState(null) // null = closed
 
   // ── localStorage key untuk backup pilihan foto
   const LS_KEY = `fg_sel_${id}`
-
-  function showToast(msg, type = 'info') {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 4000)
-  }
 
   // ── Load photos dari Google Drive
   const loadPhotos = useCallback(async (driveLink) => {
@@ -689,21 +568,76 @@ export default function ClientGallery() {
     if (idx >= 0) {
       setSelected(p => p.filter(s => s.id !== photo.id))
     } else {
-      if (selected.length >= session.maxPhotos) {
-        showToast(`Maksimal ${session.maxPhotos} foto yang bisa dipilih`, 'error')
-        return
-      }
       setSelected(p => [...p, { id: photo.id, name: photo.name }])
+    }
+  }
+
+  // ── Batal semua pilihan
+  function clearAll() {
+    if (!selected.length) return
+    setSelected([])
+    showToast('Semua pilihan dibatalkan', 'info')
+  }
+
+  // ── Pilih semua foto
+  function selectAll() {
+    const isExpired = session && new Date() > new Date(session.deadline)
+    if (submitted || isExpired) return
+    if (!photos.length) { showToast('Belum ada foto untuk dipilih', 'error'); return }
+    const pool = activeTab === 'highlight' ? highlightPhotos : photos
+    const alreadyIds = new Set(selected.map(s => s.id))
+    const toAdd = pool.filter(p => !alreadyIds.has(p.id))
+    if (!toAdd.length) {
+      showToast('Semua foto sudah dipilih', 'info')
+      return
+    }
+    const newSelected = [
+      ...selected,
+      ...toAdd.map(p => ({ id: p.id, name: p.name })),
+    ]
+    setSelected(newSelected)
+    showToast(`${newSelected.length} foto dipilih`, 'success')
+  }
+
+  // ── Download semua foto terpilih
+  const [downloading, setDownloading] = useState(false)
+  async function downloadAll() {
+    if (!selected.length) { showToast('Belum ada foto yang dipilih', 'error'); return }
+    setDownloading(true)
+    showToast(`Menyiapkan download ${selected.length} foto…`, 'info')
+    try {
+      for (let i = 0; i < selected.length; i++) {
+        const photo = selected[i]
+        const url = `/api/drive/thumb/${photo.id}?w=1600`
+        const res = await fetch(url)
+        if (!res.ok) throw new Error(`Gagal unduh foto ${i + 1}`)
+        const blob = await res.blob()
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = photo.name || `foto-${i + 1}.jpg`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(a.href)
+        // Jeda kecil antar download agar browser tidak memblokir
+        await new Promise(r => setTimeout(r, 300))
+      }
+      showToast('Semua foto berhasil diunduh! 🎉', 'success')
+    } catch (err) {
+      showToast('Gagal mengunduh: ' + err.message, 'error')
+    } finally {
+      setDownloading(false)
     }
   }
 
   async function handleSubmit() {
     if (!selected.length) { showToast('Pilih minimal 1 foto dulu', 'error'); return }
+    const ok = await confirmSubmitPhotos(selected.length)
+    if (!ok) return
     setSubmitting(true)
     try {
       const { data } = await api.post(`/sessions/${id}/submit`, { selections: selected })
       setSubmitted(true)
-      setShowConfirm(false)
 
       // Hapus backup localStorage setelah berhasil submit
       localStorage.removeItem(LS_KEY)
@@ -737,261 +671,271 @@ export default function ClientGallery() {
 
   const isDeadlinePassed = session && new Date() > new Date(session.deadline)
   const disabled         = submitted || isDeadlinePassed
-  const progress         = session ? (selected.length / session.maxPhotos) * 100 : 0
 
   /* ── Render states ── */
   if (loading) return (
-    <div className="loading-center" style={{ minHeight: '100vh' }}>
+    <div className="loading-center cg-min-h-screen">
       <div className="spinner" /><span>Memuat galeri…</span>
     </div>
   )
   if (error) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div className="card" style={{ textAlign: 'center', maxWidth: 400 }}>
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="1.5" style={{ marginBottom: 16 }}>
+    <div className="cg-centered-page">
+      <div className="card cg-error-card">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="1.5" className="cg-mb-16">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
           <circle cx="12" cy="16" r="0.5" fill="var(--red)"/>
         </svg>
-        <h2 style={{ marginBottom: 8 }}>Oops!</h2>
-        <p style={{ color: 'var(--text2)' }}>{error}</p>
+        <h2 className="cg-mb-8">Oops!</h2>
+        <p className="cg-text-color2">{error}</p>
       </div>
     </div>
   )
   if (submitted) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div className="card" style={{ textAlign: 'center', maxWidth: 480 }}>
-        <div style={{
-          width: 80, height: 80, borderRadius: '50%',
-          background: 'var(--green-bg)', border: '2px solid var(--green)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px',
-        }}>
+    <div className="cg-centered-page">
+      <div className="card cg-success-card">
+        <div className="cg-success-icon-box">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>
-        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', marginBottom: 8 }}>Terima Kasih!</h1>
-        <p style={{ color: 'var(--text2)', marginBottom: 20 }}>
+        <h1 className="cg-success-title">Terima Kasih!</h1>
+        <p className="cg-success-desc">
           Pilihan {session?.clientName} sudah kami terima. Kami akan segera memproses foto-foto pilihan Anda.
         </p>
-        <div style={{
-          background: 'var(--surface2)', borderRadius: 'var(--radius-sm)', padding: '12px 16px', marginBottom: 24,
-        }}>
+        <div className="cg-success-stats">
           <p className="text-sm text-dim">Total foto dipilih:</p>
-          <p style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--gold)', lineHeight: 1 }}>{selected.length} foto</p>
+          <p className="cg-success-stats-val">{selected.length} foto</p>
         </div>
 
         {/* Tombol WhatsApp admin — muncul jika waUrl tersedia */}
         {waUrl && (
-          <div style={{ marginBottom: 20 }}>
-            <p className="text-sm text-dim" style={{ marginBottom: 10 }}>
+          <div className="cg-mb-20">
+            <p className="text-sm text-dim cg-mb-10">
               Notifikasi dikirim otomatis ke fotografer via WhatsApp.
             </p>
             <a
               href={waUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-gold"
-              style={{ textDecoration: 'none', display: 'inline-flex', gap: 8, alignItems: 'center', justifyContent: 'center', width: '100%' }}
+              className="btn btn-gold cg-wa-btn"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-              </svg>
-              Kirim Ulang ke WhatsApp Fotografer
-            </a>
-          </div>
-        )}
+</svg>
+Kirim Ulang ke WhatsApp Fotografer
+</a>
+</div>
+)}
 
-        <p className="text-sm text-dim" style={{ marginBottom: 24 }}>Hubungi fotografer jika ada pertanyaan.</p>
+<p className="text-sm text-dim cg-mb-24">Hubungi fotografer jika ada pertanyaan.</p>
 
-        {/* Tombol lihat album */}
-        <button
-          className="btn btn-gold"
-          onClick={() => navigate(`/session/${id}/album`)}
-          style={{ width: '100%', justifyContent: 'center', marginBottom: 12, fontSize: '1rem', padding: '14px 20px' }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-            <circle cx="12" cy="13" r="4"/>
-          </svg>
-          ✨ Lihat Album Foto Anda
-        </button>
-      </div>
-    </div>
-  )
-  if (isDeadlinePassed && !submitted) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div className="card" style={{ textAlign: 'center', maxWidth: 400 }}>
-        <div style={{
-          width: 80, height: 80, borderRadius: '50%',
-          background: 'var(--red-bg)', border: '2px solid rgba(248,113,113,0.3)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px',
-        }}>
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="1.5">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-          </svg>
-        </div>
-        <h2 style={{ marginBottom: 8 }}>Waktu Habis</h2>
-        <p style={{ color: 'var(--text2)' }}>Batas waktu pemilihan foto sudah berakhir. Hubungi fotografer.</p>
-      </div>
-    </div>
-  )
+{/* Tombol lihat album */}
+<button
+className="btn btn-gold cg-view-album-btn"
+onClick={() => navigate(`/session/${id}/album`)}
+>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+<circle cx="12" cy="13" r="4"/>
+</svg>
+✨ Lihat Album Foto Anda
+</button>
+</div>
+</div>
+)
+if (isDeadlinePassed && !submitted) return (
+<div className="cg-centered-page">
+<div className="card cg-error-card">
+<div className="cg-timeout-icon-box">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="1.5">
+<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+</svg>
+</div>
+<h2 className="cg-mb-8">Waktu Habis</h2>
+<p className="cg-text-color2">Batas waktu pemilihan foto sudah berakhir. Hubungi fotografer.</p>
+</div>
+</div>
+)
 
-  return (
-    <div className="page-wrap" style={{ paddingBottom: 100 }}>
+return (
+<div className="page-wrap cg-pb-100">
 
-      {/* Lightbox */}
-      {lbIdx !== null && displayPhotos.length > 0 && (
-        <Lightbox
-          photos={displayPhotos}
-          startIdx={lbIdx}
-          selected={selected}
-          onToggle={togglePhoto}
-          onClose={() => setLbIdx(null)}
-          disabled={disabled}
-        />
-      )}
+{/* Lightbox */}
+{lbIdx !== null && displayPhotos.length > 0 && (
+<Lightbox
+photos={displayPhotos}
+startIdx={lbIdx}
+selected={selected}
+onToggle={togglePhoto}
+onClose={() => setLbIdx(null)}
+disabled={disabled}
+/>
+)}
 
-      {/* Toast */}
-      {toast && (
-        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
-          <div className={`toast toast-${toast.type}`}>{toast.msg}</div>
-        </div>
-      )}
+{/* Header */}
+<header className="cg-page-header">
+<div className="cg-header-inner">
+<div className="cg-header-title-box">
+<div className="cg-eyebrow">
+Album Foto
+</div>
+<h1 className="cg-client-name">
+{session?.clientName}
+</h1>
+</div>
 
-      {/* Confirm Modal */}
-      {showConfirm && (
-        <ConfirmModal
-          count={selected.length} max={session.maxPhotos}
-          onConfirm={handleSubmit} onCancel={() => setShowConfirm(false)}
-          loading={submitting}
-        />
-      )}
+{/* Countdown */}
+<div className="cg-timer-box">
+<div className="text-xs text-dim cg-timer-label">⏳ Batas waktu memilih</div>
+<Countdown deadline={session?.deadline} />
+</div>
 
-      {/* Header */}
-      <header style={{
-        background: 'rgba(10,10,15,0.95)', backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid var(--border)',
-        position: 'sticky', top: 0, zIndex: 100, padding: '14px 20px',
-      }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 12 }}>
-            <div style={{ fontSize: '0.65rem', color: 'var(--text3)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }}>
-              Album Foto
-            </div>
-            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.2rem,3vw,1.8rem)', fontWeight: 300 }}>
-              {session?.clientName}
-            </h1>
-          </div>
+{/* Tabs */}
+<TabBar
+active={activeTab}
+onChange={setActiveTab}
+total={photos.length}
+highlights={highlightPhotos.length}
+selected={selected.length}
+/>
+</div>
+</header>
 
-          {/* Countdown */}
-          <div style={{
-            background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-sm)', padding: '10px', marginBottom: 10,
-          }}>
-            <div className="text-xs text-dim" style={{ textAlign: 'center', marginBottom: 6 }}>⏳ Batas waktu memilih</div>
-            <Countdown deadline={session?.deadline} />
-          </div>
+{/* Gallery */}
+{photosLoading ? (
+<div className="loading-center cg-min-h-60">
+<div className="spinner" /><span>Memuat foto dari Google Drive…</span>
+</div>
+) : driveError ? (
+<div className="loading-center cg-error-state">
+<div className="cg-error-icon">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="1.5">
+<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+<circle cx="12" cy="16" r="0.5" fill="var(--red)"/>
+</svg>
+</div>
+<div>
+<p className="cg-error-title">Gagal Memuat Foto</p>
+<p className="cg-error-desc">{driveError}</p>
+</div>
+<button className="btn btn-ghost btn-sm" onClick={() => session?.driveLink && loadPhotos(session.driveLink)}>
+Coba Lagi
+</button>
+</div>
+) : displayPhotos.length === 0 ? (
+<div className="loading-center cg-empty-state">
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" strokeWidth="1">
+<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+<circle cx="12" cy="13" r="4"/>
+</svg>
+<p className="cg-text-color3">
+{activeTab === 'highlight' ? 'Belum ada foto highlight. Tandai foto dengan ⭐ di Google Drive.' :
+activeTab === 'selected'  ? 'Belum ada foto yang dipilih.' :
+'Tidak ada foto.'}
+</p>
+{activeTab !== 'all' && (
+<button className="btn btn-ghost btn-sm" onClick={() => setActiveTab('all')}>
+Lihat Semua Foto
+</button>
+)}
+</div>
+) : (
+<div className="masonry cg-masonry-pad">
+{displayPhotos.map(photo => {
+const isSelected = selected.some(s => s.id === photo.id)
+const order = selected.findIndex(s => s.id === photo.id) + 1
+return (
+<PhotoCard
+key={photo.id}
+photo={photo}
+isSelected={isSelected}
+selectionOrder={order > 0 ? order : ''}
+onToggle={togglePhoto}
+onZoom={() => openLightbox(photo)}
+disabled={disabled}
+/>
+)
+})}
+</div>
+)}
 
-          {/* Tabs */}
-          <TabBar
-            active={activeTab}
-            onChange={setActiveTab}
-            total={photos.length}
-            highlights={highlightPhotos.length}
-            selected={selected.length}
-          />
-        </div>
-      </header>
+{/* Selection bar */}
+<div className="selection-bar">
+<div className="sel-count">
+<div className="sel-count-num">
+{selected.length}
+</div>
+<div className="sel-count-label">foto dipilih</div>
+</div>
 
-      {/* Gallery */}
-      {photosLoading ? (
-        <div className="loading-center" style={{ minHeight: '60vh' }}>
-          <div className="spinner" /><span>Memuat foto dari Google Drive…</span>
-        </div>
-      ) : driveError ? (
-        <div className="loading-center" style={{ minHeight: '60vh', flexDirection: 'column', gap: 16, padding: '0 24px', textAlign: 'center' }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: '50%',
-            background: 'var(--red-bg)', border: '1px solid rgba(248,113,113,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
-              <circle cx="12" cy="16" r="0.5" fill="var(--red)"/>
-            </svg>
-          </div>
-          <div>
-            <p style={{ color: 'var(--red)', fontWeight: 600, marginBottom: 6 }}>Gagal Memuat Foto</p>
-            <p style={{ color: 'var(--text2)', fontSize: '0.875rem', maxWidth: 400 }}>{driveError}</p>
-          </div>
-          <button className="btn btn-ghost btn-sm" onClick={() => session?.driveLink && loadPhotos(session.driveLink)}>
-            Coba Lagi
-          </button>
-        </div>
-      ) : displayPhotos.length === 0 ? (
-        <div className="loading-center" style={{ minHeight: '60vh', flexDirection: 'column', gap: 12 }}>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" strokeWidth="1">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-            <circle cx="12" cy="13" r="4"/>
-          </svg>
-          <p style={{ color: 'var(--text3)' }}>
-            {activeTab === 'highlight' ? 'Belum ada foto highlight. Tandai foto dengan ⭐ di Google Drive.' :
-             activeTab === 'selected'  ? 'Belum ada foto yang dipilih.' :
-             'Tidak ada foto.'}
-          </p>
-          {activeTab !== 'all' && (
-            <button className="btn btn-ghost btn-sm" onClick={() => setActiveTab('all')}>
-              Lihat Semua Foto
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="masonry" style={{ padding: '16px' }}>
-          {displayPhotos.map(photo => {
-            const isSelected = selected.some(s => s.id === photo.id)
-            const order = selected.findIndex(s => s.id === photo.id) + 1
-            return (
-              <PhotoCard
-                key={photo.id}
-                photo={photo}
-                isSelected={isSelected}
-                selectionOrder={order > 0 ? order : ''}
-                onToggle={togglePhoto}
-                onZoom={() => openLightbox(photo)}
-                disabled={disabled}
-              />
-            )
-          })}
-        </div>
-      )}
+{/* Action buttons */}
+<div className="cg-selbar-actions">
+{/* Batal Pilih */}
+{!disabled && (
+<button
+className="btn btn-ghost cg-selbar-btn"
+onClick={clearAll}
+disabled={!selected.length}
+title="Batal semua pilihan"
+>
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+</svg>
+Batal Pilih
+</button>
+)}
 
-      {/* Selection bar */}
-      <div className="selection-bar">
-        <div className="sel-count">
-          <div className="sel-count-num">
-            {selected.length}
-            <span style={{ fontSize: '1rem', color: 'var(--text3)', fontWeight: 400 }}>/{session?.maxPhotos}</span>
-          </div>
-          <div className="sel-count-label">foto dipilih</div>
-        </div>
-        <div className="sel-progress">
-          <div className="sel-progress-fill" style={{ width: `${Math.min(100, progress)}%` }} />
-        </div>
-        <button
-          className="btn btn-gold"
-          onClick={() => {
-            if (!selected.length) { showToast('Pilih minimal 1 foto dulu', 'error'); return }
-            setShowConfirm(true)
-          }}
-          disabled={disabled || !selected.length}
-          style={{ flexShrink: 0 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          Selesai Memilih
-        </button>
-      </div>
-    </div>
-  )
+{/* Pilih Semua */}
+{!disabled && (
+<button
+className="btn btn-ghost cg-selbar-btn"
+onClick={selectAll}
+title="Pilih semua foto"
+>
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+<rect x="3" y="3" width="18" height="18" rx="3"/>
+<polyline points="9 12 11 14 15 10"/>
+</svg>
+Pilih Semua
+</button>
+)}
+
+{/* Download */}
+<button
+className="btn cg-selbar-btn cg-btn-download"
+onClick={downloadAll}
+disabled={downloading || !selected.length}
+title="Download semua foto terpilih"
+>
+{downloading
+? <><div className="spinner spinner-sm" /> Mengunduh…</>
+: <>
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+<polyline points="7 10 12 15 17 10"/>
+<line x1="12" y1="15" x2="12" y2="3"/>
+</svg>
+Download ({selected.length})
+</>
+}
+</button>
+
+{/* Selesai Memilih */}
+<button
+className="btn btn-gold cg-flex-shrink-0"
+onClick={handleSubmit}
+disabled={disabled || !selected.length || submitting}
+>
+{submitting
+  ? <><div className="spinner spinner-sm" /> Menyimpan…</>
+  : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    Selesai Memilih</>
+}
+</button>
+</div>
+</div>
+</div>
+)
 }

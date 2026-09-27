@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api'
 import logo from '../assets/Logo_khansa.png'
-import { ToastContainer, useToast } from '../components/Toast'
+import { showToast } from '../lib/swal'
+import './ChangePassword.css'
 
 export default function ChangePassword() {
   const nav = useNavigate()
-  const { toasts, addToast } = useToast()
 
   const [form, setForm] = useState({
     currentPassword: '',
@@ -23,11 +23,11 @@ export default function ChangePassword() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (form.newPassword !== form.confirmPassword) {
-      addToast('Password baru dan konfirmasi tidak cocok', 'error')
+      showToast('Password baru dan konfirmasi tidak cocok', 'error')
       return
     }
     if (form.newPassword.length < 6) {
-      addToast('Password baru minimal 6 karakter', 'error')
+      showToast('Password baru minimal 6 karakter', 'error')
       return
     }
     setLoading(true)
@@ -36,13 +36,14 @@ export default function ChangePassword() {
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       })
-      addToast('Password berhasil diubah! Silakan login ulang.', 'success')
+      showToast('Password berhasil diubah! Silakan login ulang.', 'success')
       setTimeout(() => {
         localStorage.removeItem('fg_token')
+            localStorage.removeItem('fg_user')
         nav('/login')
       }, 2000)
     } catch (err) {
-      addToast(err.response?.data?.message || 'Gagal mengubah password', 'error')
+      showToast(err.response?.data?.message || 'Gagal mengubah password', 'error')
     } finally {
       setLoading(false)
     }
@@ -72,11 +73,7 @@ export default function ChangePassword() {
       <button
         type="button"
         onClick={onToggle}
-        style={{
-          position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--text3)', display: 'flex', alignItems: 'center',
-        }}
+        className="cp-input-icon-right"
         tabIndex={-1}
       >
         {show
@@ -88,28 +85,17 @@ export default function ChangePassword() {
   }
 
   return (
-    <div className="page-wrap" style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
-    }}>
-      <ToastContainer toasts={toasts} />
+    <div className="page-wrap cp-page-wrap">
 
       {/* Background decoration */}
-      <div style={{
-        position: 'fixed', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse at 30% 40%, rgba(232,200,122,0.06) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(96,165,250,0.04) 0%, transparent 50%)',
-      }} />
+      <div className="cp-bg-decoration" />
 
-      <div style={{ width: '100%', maxWidth: 460, position: 'relative', zIndex: 1 }}>
+      <div className="cp-content">
 
         {/* Back button */}
         <button
           onClick={() => nav('/dashboard')}
-          className="btn btn-ghost btn-sm"
-          style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 6 }}
+          className="btn btn-ghost btn-sm cp-back-btn"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"/>
@@ -118,94 +104,72 @@ export default function ChangePassword() {
         </button>
 
         {/* Logo / Brand */}
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div style={{
-            width: 72, height: 72, borderRadius: 16,
-            background: 'rgba(232,200,122,0.08)',
-            border: '1px solid rgba(232,200,122,0.2)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px',
-            boxShadow: '0 8px 32px rgba(232,200,122,0.12)',
-            overflow: 'hidden', padding: 6,
-          }}>
-            <img src={logo} alt="Khansa Project" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        <div className="cp-header">
+          <div className="cp-logo-box">
+            <img src={logo} alt="Khansa Project" className="cp-logo-img" />
           </div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: 4 }}>
+          <h1 className="cp-title">
             Ganti <span className="text-gold">Password</span>
           </h1>
-          <p style={{ color: 'var(--text2)', fontSize: '0.875rem' }}>
+          <p className="cp-subtitle">
             Perbarui password akun admin Anda
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="card-glass" style={{ padding: 32 }}>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="card-glass cp-card">
+          <form onSubmit={handleSubmit} className="cp-form">
 
             {/* Current Password */}
             <div className="form-group">
               <label className="form-label">Password Saat Ini</label>
-              <div style={{ position: 'relative' }}>
+              <div className="cp-input-wrap">
                 <input
                   type={showCurrent ? 'text' : 'password'}
-                  className="form-input"
+                  className="form-input cp-input-padded"
                   placeholder="Masukkan password saat ini"
                   value={form.currentPassword}
                   onChange={e => set('currentPassword', e.target.value)}
                   required
                   autoFocus
-                  style={{ paddingLeft: '44px', paddingRight: '44px' }}
                 />
-                <svg style={{
-                  position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-                  color: 'var(--text3)', width: 16, height: 16, pointerEvents: 'none',
-                }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
+
                 <EyeBtn show={showCurrent} onToggle={() => setShowCurrent(v => !v)} />
               </div>
             </div>
 
             {/* Divider */}
-            <div className="divider" style={{ margin: '0' }} />
+            <div className="divider cp-divider" />
 
             {/* New Password */}
             <div className="form-group">
               <label className="form-label">Password Baru</label>
-              <div style={{ position: 'relative' }}>
+              <div className="cp-input-wrap">
                 <input
                   type={showNew ? 'text' : 'password'}
-                  className="form-input"
+                  className="form-input cp-input-padded"
                   placeholder="Masukkan password baru"
                   value={form.newPassword}
                   onChange={e => set('newPassword', e.target.value)}
                   required
-                  style={{ paddingLeft: '44px', paddingRight: '44px' }}
                 />
-                <svg style={{
-                  position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-                  color: 'var(--text3)', width: 16, height: 16, pointerEvents: 'none',
-                }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
+
                 <EyeBtn show={showNew} onToggle={() => setShowNew(v => !v)} />
               </div>
 
               {/* Password strength bar */}
               {form.newPassword && (
-                <div style={{ marginTop: 8 }}>
-                  <div style={{
-                    height: 4, background: 'var(--surface2)', borderRadius: 99, overflow: 'hidden',
-                  }}>
-                    <div style={{
-                      height: '100%', borderRadius: 99,
-                      width: `${(str.level / 4) * 100}%`,
-                      background: str.color,
-                      transition: 'width 0.3s ease, background 0.3s ease',
-                    }} />
+                <div className="cp-strength-container">
+                  <div className="cp-strength-bar-bg">
+                    <div 
+                      className="cp-strength-bar-fill"
+                      style={{
+                        width: `${(str.level / 4) * 100}%`,
+                        background: str.color,
+                      }} 
+                    />
                   </div>
-                  <span style={{ fontSize: '0.72rem', color: str.color, marginTop: 4, display: 'block' }}>
+                  <span className="cp-strength-label" style={{ color: str.color }}>
                     Kekuatan: {str.label}
                   </span>
                 </div>
@@ -218,16 +182,15 @@ export default function ChangePassword() {
             {/* Confirm New Password */}
             <div className="form-group">
               <label className="form-label">Konfirmasi Password Baru</label>
-              <div style={{ position: 'relative' }}>
+              <div className="cp-input-wrap">
                 <input
                   type={showConfirm ? 'text' : 'password'}
-                  className="form-input"
+                  className="form-input cp-input-padded"
                   placeholder="Ulangi password baru"
                   value={form.confirmPassword}
                   onChange={e => set('confirmPassword', e.target.value)}
                   required
                   style={{
-                    paddingLeft: '44px', paddingRight: '44px',
                     borderColor: form.confirmPassword
                       ? form.confirmPassword === form.newPassword
                         ? 'var(--green)'
@@ -235,18 +198,7 @@ export default function ChangePassword() {
                       : undefined,
                   }}
                 />
-                <svg style={{
-                  position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-                  color: form.confirmPassword
-                    ? form.confirmPassword === form.newPassword ? 'var(--green)' : 'var(--red)'
-                    : 'var(--text3)',
-                  width: 16, height: 16, pointerEvents: 'none',
-                }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  {form.confirmPassword && form.confirmPassword === form.newPassword
-                    ? <polyline points="20 6 9 17 4 12"/>
-                    : <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>
-                  }
-                </svg>
+
                 <EyeBtn show={showConfirm} onToggle={() => setShowConfirm(v => !v)} />
               </div>
               {form.confirmPassword && form.confirmPassword !== form.newPassword && (
@@ -256,9 +208,8 @@ export default function ChangePassword() {
 
             <button
               type="submit"
-              className="btn btn-gold btn-full btn-lg"
+              className="btn btn-gold btn-full btn-lg cp-submit-btn"
               disabled={loading || !form.currentPassword || !form.newPassword || form.newPassword !== form.confirmPassword}
-              style={{ marginTop: 4 }}
             >
               {loading ? (
                 <>
@@ -279,11 +230,7 @@ export default function ChangePassword() {
           </form>
         </div>
 
-        <div style={{
-          marginTop: 16, padding: '12px 16px',
-          background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)',
-          borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text2)',
-        }}>
+        <div className="cp-warning-box">
           ⚠️ Setelah password berhasil diubah, Anda akan otomatis keluar dan diminta login ulang.
         </div>
       </div>

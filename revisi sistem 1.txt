@@ -1,0 +1,12 @@
+1. tambah fitur batal pilih foto di client ✔️
+2. yang dikirim ke wa admin nomor gambar tanpa IMG dan JPEG. ✔️
+3. warna pilih foto warna biru ✔️
+4. tambah fitur pilih semua untuk download di client ✔️
+5. di halaman pilih foto tambah pilih semua foto dan download foto yang terpilih ✔️
+6. tambah akun admin, buat jadi beda untuk tampilan admin dan setiap logo vendor berbeda ✔️
+7. foto landing page sesuai pilihan client ❌
+8. di dashboard admin, download semua foto yang dikonfirmasi client ❌ (tidak bisa dilakukan karena terlalu berat dan dapat popup block dari google drive)
+9. icon zoom pilih foto diubah ✔️
+10. batas pilih foto tetap ada, tetapi client bisa download semua foto ✔️
+11. client tetap bisa akses web untuk lihat hasil edit dan di wa link web bukan link google drive ✔️
+12. icon minizoom untuk kembali tampilan awal pilih foto

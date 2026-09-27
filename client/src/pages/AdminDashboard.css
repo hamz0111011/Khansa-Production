@@ -1,0 +1,319 @@
+.ad-expired-text {
+  color: var(--red);
+}
+
+.ad-session-form-card {
+  margin-bottom: 24px;
+}
+
+.ad-form-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ad-form-subtitle {
+  margin-top: 2px;
+}
+
+.ad-form-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--gold-bg);
+  border: 1px solid rgba(232, 200, 122, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-mb-16 {
+  margin-bottom: 16px;
+}
+
+.ad-mb-20 {
+  margin-bottom: 20px;
+}
+
+.ad-input-wrap {
+  position: relative;
+}
+
+.ad-input-pr-60 {
+  padding-right: 60px;
+}
+
+.ad-input-suffix {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  font-size: 0.8rem;
+}
+
+.ad-submit-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.ad-success-box {
+  margin-top: 16px;
+  background: rgba(74, 222, 128, 0.06);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+
+.ad-mb-12 {
+  margin-bottom: 12px;
+}
+
+.ad-success-title {
+  color: var(--green);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.ad-mb-10 {
+  margin-bottom: 10px;
+}
+
+.ad-link-label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.ad-link-display {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--gold);
+  word-break: break-all;
+}
+
+.ad-flex-gap-8 {
+  display: flex;
+  gap: 8px;
+}
+
+.ad-wa-btn-flex {
+  flex: 1;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.ad-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.ad-empty-text {
+  color: var(--text3);
+}
+
+.ad-mt-4 {
+  margin-top: 4px;
+}
+
+.ad-table-row-clickable {
+  cursor: pointer;
+}
+
+.ad-client-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ad-wa-link {
+  color: var(--text2);
+  text-decoration: none;
+}
+
+.ad-text-color {
+  color: var(--text);
+}
+
+.ad-text-color2 {
+  color: var(--text2);
+}
+
+.ad-table-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.ad-inline-flex-center {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ad-delete-btn {
+  color: var(--red);
+}
+
+.ad-p-0 {
+  padding: 0;
+}
+
+.ad-expanded-content {
+  padding: 16px 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.ad-expanded-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ad-flex-col-gap-6 {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ad-photo-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.ad-photo-index {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gold-bg);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.ad-flex-1 {
+  flex: 1;
+}
+
+.ad-photo-name {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.ad-photo-id {
+  font-family: monospace;
+}
+
+.ad-no-decoration {
+  text-decoration: none;
+}
+
+.ad-stat-card {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.ad-stat-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ad-stat-icon {
+  font-size: 1.3rem;
+}
+
+.ad-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ad-mt-3 {
+  margin-top: 3px;
+}
+
+.ad-page-wrap {
+  min-height: 100vh;
+}
+
+.ad-header {
+  border-bottom: 1px solid var(--border);
+  background: rgba(10, 10, 15, 0.9);
+  backdrop-filter: blur(16px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.ad-header-inner {
+  max-width: 1780px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ad-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ad-logo {
+  height: 48px;
+  object-fit: contain;
+}
+
+.ad-header-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.ad-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ad-gold-icon {
+  color: var(--gold);
+}
+
+.ad-main {
+  max-width: 1780px;
+  margin: 0 auto;
+}
+
+.ad-list-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ad-list-badge {
+  margin-left: 8px;
+  font-size: 0.75rem;
+  color: var(--text3);
+  background: var(--surface2);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
