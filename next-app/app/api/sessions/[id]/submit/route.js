@@ -51,7 +51,7 @@ export async function POST(req, { params }) {
         day: 'numeric', month: 'long', year: 'numeric',
         hour: '2-digit', minute: '2-digit',
       })
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fotografer.vercel.app'
+      const siteUrl = process.env.SITE_URL || 'https://fotografer.vercel.app'
       const sessionUrl = `${siteUrl}/session/${id}`
       const lines = [
         `📸 *KONFIRMASI PILIHAN FOTO*`,

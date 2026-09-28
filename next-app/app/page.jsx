@@ -419,7 +419,7 @@ export default function LandingPage() {
           {/* Brand */}
           <div className="v2-footer-brand">
             <div className="v2-footer-logo">
-              <Image src="/Logo_khansa.png" alt="Logo" width={36} height={36} style={{ objectFit: 'contain', width: '100%', height: '100%' }} />
+              <Image src="/logo-khansa-6.png" alt="Logo" width={36} height={36} style={{ objectFit: 'contain', width: '100%', height: '100%' }} />
             </div>
             <div>
               <div className="v2-footer-name">Khansa Project</div>
