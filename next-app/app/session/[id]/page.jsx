@@ -7,11 +7,25 @@ import { showToast, confirmSubmitPhotos } from '@/lib/swal'
 
 function extractFolderId(link) {
   if (!link) return null
-  const m1 = link.match(/\/folders\/([a-zA-Z0-9_-]+)/)
+  // Trim whitespace yang mungkin ikut saat copy-paste
+  const trimmed = link.trim()
+  if (!trimmed) return null
+
+  // 1) Format: /folders/FOLDER_ID (mencakup /drive/folders/, /drive/u/0/folders/, /drive/mobile/folders/, dll)
+  const m1 = trimmed.match(/\/folders\/([a-zA-Z0-9_-]+)/)
   if (m1) return m1[1]
-  const m2 = link.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+
+  // 2) Format: ?id=FOLDER_ID atau &id=FOLDER_ID (mencakup /open?id=, /folderview?id=, dll)
+  const m2 = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/)
   if (m2) return m2[1]
-  if (/^[a-zA-Z0-9_-]{20,}$/.test(link)) return link
+
+  // 3) Format: /file/d/FILE_ID (untuk single file link, bukan folder — tapi tetap coba extract)
+  const m3 = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/)
+  if (m3) return m3[1]
+
+  // 4) Raw folder ID langsung (string alfanumerik 10+ karakter)
+  if (/^[a-zA-Z0-9_-]{10,}$/.test(trimmed)) return trimmed
+
   return null
 }
 function thumbUrl(id, w = 400) { return `/api/drive/thumb/${id}?w=${w}` }
@@ -391,7 +405,7 @@ export default function ClientGalleryPage() {
     setDriveError(null)
     try {
       const folderId = extractFolderId(driveLink)
-      if (!folderId) throw new Error('Format link Google Drive tidak dikenali')
+      if (!folderId) throw new Error('Format link Google Drive tidak dikenali. Pastikan link berformat: https://drive.google.com/drive/folders/...')
       const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY
       if (!apiKey) throw new Error('API Key belum dikonfigurasi. Hubungi fotografer.')
       const files = await loadAllDrivePhotos(folderId, apiKey)
